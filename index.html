@@ -6,9 +6,11 @@
 <title>Registro de proyectos · Feria Científica 2027</title>
 <style>
 :root{--bg:#f5faff;--sf:#fff;--tx:#1e2d3d;--mu:#5a6b7d;--ln:#d3e2f0;--ac:#2a7ab8;--ac2:#fff;--er:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:none){:root:not([data-theme="light"]){--bg:#121a14;--sf:#1b261d;--tx:#e8efe6;--mu:#9fb0a2;--ln:#2f4033;--ac:#7fd083;--ac2:#10200f;--er:#ff8a80;color-scheme:dark}}
+:root[data-theme="off"]{--bg:#121a14;--sf:#1b261d;--tx:#e8efe6;--mu:#9fb0a2;--ln:#2f4033;--ac:#7fd083;--ac2:#10200f;--er:#ff8a80;color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:680px;margin:0 auto;padding:20px 16px 60px}
 h1{font-size:1.7rem;line-height:1.2;margin:8px 0 6px}
 h2{font-size:1.15rem;margin:0 0 4px}
@@ -22,9 +24,9 @@ legend{font-weight:700;padding:0 6px}
 label{display:block;font-weight:600;margin:12px 0 4px;font-size:.95rem}
 input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1.5px solid var(--ln);border-radius:6px;padding:10px 11px}
 textarea{min-height:92px;resize:vertical}
-:is(input,select,textarea,button):focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+:is(input,select,textarea,button,summary):focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 .bad{border-color:var(--er)}
-.msg{color:var(--er);font-size:.85rem;margin-top:3px}
+.msg{color:var(--er);font-size:.85rem;min-height:0;margin-top:3px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 @media (max-width:520px){.row{grid-template-columns:1fr}}
 .areas{display:grid;gap:8px;margin-top:6px}
@@ -68,7 +70,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <label for="resumen">Resumen (máx. 250 palabras)</label>
 <textarea id="resumen" required></textarea>
 <div class="mu" id="cnt">0 / 250 palabras</div>
-<label for="archivo">Anteproyecto (PDF o Word, máx. 10 MB)</label>
+<label for="archivo">Anteproyecto (PDF o Word, máx. 20 MB)</label>
 <input id="archivo" type="file" accept=".pdf,.doc,.docx" required>
 <div class="msg" id="e-archivo"></div>
 </fieldset>
@@ -129,8 +131,10 @@ var AREAS=[
 ["Ingeniería y Tecnología","#c00000","Diseño y construcción de soluciones prácticas ante problemas reales."],
 ["Química","#e8606a","Composición, estructura y transformación de la materia."],
 ["Salud y Medicina","#009999","Cuerpo humano, prevención de enfermedades, nutrición y salud pública."]];
+var REG=["Bocas del Toro","Chiriquí","Coclé","Colón","Darién","Herrera","Los Santos","Panamá","Panamá Oeste","Veraguas","Comarca Guna Yala","Comarca Ngäbe-Buglé","Comarca Emberá-Wounaan"];
 var $=function(i){return document.getElementById(i)};
 var key="feria2027_proyectos";
+
 function load(){try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return[]}}
 function save(a){try{localStorage.setItem(key,JSON.stringify(a))}catch(e){}}
 
@@ -146,10 +150,13 @@ else{$("dias").textContent=d;$("plazoTxt").innerHTML="<b style='font-size:1rem'>
 
 // Áreas
 var ah="";
-AREAS.forEach(function(a){ah+='<label class="area" style="--c:'+a[1]+';margin:0;font-weight:400"><input type="radio" name="area" value="'+a[0]+'"><i></i><div><b>'+a[0]+'</b><span>'+a[2]+'</span></div></label>'});
+AREAS.forEach(function(a,i){ah+='<label class="area" style="--c:'+a[1]+';margin:0;font-weight:400"><input type="radio" name="area" value="'+a[0]+'"><i></i><div><b>'+a[0]+'</b><span>'+a[2]+'</span></div></label>'});
 $("areas").innerHTML=ah;
 $("areas").addEventListener("change",function(){
 [].forEach.call(document.querySelectorAll(".area"),function(l){l.classList.toggle("on",l.querySelector("input").checked)});$("e-area").textContent=""});
+
+// Regiones
+
 
 // Integrantes
 var nM=0;
@@ -179,7 +186,7 @@ flag($("correo"),!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($("correo").value));
 var fl=$("archivo").files[0];$("e-archivo").textContent="";
 if(!fl){$("e-archivo").textContent="Sube tu anteproyecto.";flag($("archivo"),true)}
 else if(!/\.(pdf|docx?)$/i.test(fl.name)){$("e-archivo").textContent="Solo se aceptan PDF o Word.";flag($("archivo"),true)}
-else if(fl.size>10*1048576){$("e-archivo").textContent="El archivo supera 10 MB.";flag($("archivo"),true)}
+else if(fl.size>20*1048576){$("e-archivo").textContent="El archivo supera 20 MB.";flag($("archivo"),true)}
 else marca($("archivo"),false);
 $("e-acepto").textContent="";
 if(!$("acepto").checked){$("e-acepto").textContent="Debes confirmar la declaración.";err++;primero=primero||$("acepto")}
@@ -188,6 +195,7 @@ if(err){$("e-gen").textContent="Revisa los campos marcados: todos son obligatori
 $("e-gen").textContent="";
 var btn=$("enviar");
 function fallo(m){$("e-gen").textContent=m;btn.disabled=false;btn.textContent="Enviar registro"}
+if(ENDPOINT.indexOf("PEGAR")>-1){fallo("Falta configurar la dirección del servidor (ENDPOINT).");return}
 btn.disabled=true;btn.textContent="Enviando…";
 var area=document.querySelector('input[name=area]:checked').value;
 var rd=new FileReader();
