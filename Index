@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registro de proyectos · Feria Científica 2027</title>
+<style>
+:root{--bg:#f5faff;--sf:#fff;--tx:#1e2d3d;--mu:#5a6b7d;--ln:#d3e2f0;--ac:#2a7ab8;--ac2:#fff;--er:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:680px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.7rem;line-height:1.2;margin:8px 0 6px}
+h2{font-size:1.15rem;margin:0 0 4px}
+p{margin:0 0 10px}
+.mu{color:var(--mu);font-size:.92rem}
+.plazo{display:flex;gap:12px;align-items:center;background:var(--sf);border:1px solid var(--ln);border-left:6px solid var(--ac);border-radius:8px;padding:12px 14px;margin:16px 0}
+.plazo b{font-size:1.5rem;line-height:1}
+.plazo.cerrado{border-left-color:var(--er)}
+fieldset{border:1px solid var(--ln);background:var(--sf);border-radius:10px;padding:16px;margin:0 0 18px;min-width:0}
+legend{font-weight:700;padding:0 6px}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:.95rem}
+input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1.5px solid var(--ln);border-radius:6px;padding:10px 11px}
+textarea{min-height:92px;resize:vertical}
+:is(input,select,textarea,button):focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.bad{border-color:var(--er)}
+.msg{color:var(--er);font-size:.85rem;margin-top:3px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+.areas{display:grid;gap:8px;margin-top:6px}
+.area{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--ln);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+.area input{width:auto;margin:4px 0 0}
+.area i{flex:none;width:10px;align-self:stretch;border-radius:4px;background:var(--c)}
+.area.on{border-color:var(--c);box-shadow:inset 0 0 0 1.5px var(--c)}
+.area b{display:block}
+.area span{font-size:.86rem;color:var(--mu);line-height:1.4}
+.mem{border-top:1px dashed var(--ln);margin-top:12px;padding-top:2px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1.5px solid var(--ac);padding:11px 18px;font-weight:700;background:transparent;color:var(--ac)}
+button.pri{background:var(--ac);color:var(--ac2);width:100%;font-size:1.05rem;padding:14px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.ok{background:var(--sf);border:2px solid var(--ac);border-radius:10px;padding:20px;margin:16px 0}
+.cod{font-size:1.6rem;font-weight:700;letter-spacing:.04em}
+.lista{margin-top:28px}
+.item{background:var(--sf);border:1px solid var(--ln);border-left:6px solid var(--c);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.item small{color:var(--mu)}
+.hid{display:none}
+</style>
+</head>
+<body>
+<main>
+<p class="mu" style="margin:0;font-weight:700">Instituto Benigno Jiménez Garay</p>
+<h1>Feria Científica 2027<br>Registro de proyectos</h1>
+<p class="mu">Todos los campos son obligatorios, incluido el anteproyecto.</p>
+<div class="plazo" id="plazo"><div><b id="dias">–</b></div><div id="plazoTxt"></div></div>
+
+<form id="f" novalidate>
+<fieldset>
+<legend>1. Área temática</legend>
+<p class="mu">Tu proyecto debe ubicarse en una sola área.</p>
+<div class="areas" id="areas"></div>
+<div class="msg" id="e-area"></div>
+</fieldset>
+
+<fieldset>
+<legend>2. El proyecto</legend>
+<label for="titulo">Título del proyecto</label>
+<input id="titulo" maxlength="140" required>
+<label for="resumen">Resumen (máx. 250 palabras)</label>
+<textarea id="resumen" required></textarea>
+<div class="mu" id="cnt">0 / 250 palabras</div>
+<label for="archivo">Anteproyecto (PDF o Word, máx. 10 MB)</label>
+<input id="archivo" type="file" accept=".pdf,.doc,.docx" required>
+<div class="msg" id="e-archivo"></div>
+</fieldset>
+
+<fieldset>
+<legend>3. Líder del equipo (contacto)</legend>
+<label for="lider">Nombre completo</label>
+<input id="lider" required>
+<div class="row">
+<div><label for="grado">Grado</label><input id="grado" required></div>
+<div><label for="salon">Salón</label><input id="salon" required></div>
+</div>
+<label for="correo">Correo</label>
+<input id="correo" type="email" required>
+<p class="mu" style="margin-top:14px">Otros integrantes (el equipo puede tener hasta 10 en total, contando al líder):</p>
+<div id="miembros"></div>
+<button type="button" id="addM">Agregar integrante</button>
+</fieldset>
+
+<fieldset>
+<legend>4. Docente asesor</legend>
+<label for="asesor">Nombre completo</label>
+<input id="asesor" required>
+</fieldset>
+
+<fieldset>
+<legend>5. Confirmación</legend>
+<label style="display:flex;gap:10px;font-weight:400"><input id="acepto" type="checkbox" style="width:auto;margin-top:5px" required>
+<span>Declaro que la información es verdadera y que el anteproyecto es trabajo original del equipo.</span></label>
+<div class="msg" id="e-acepto"></div>
+</fieldset>
+
+<button class="pri" id="enviar" type="submit">Enviar registro</button>
+<div class="msg" id="e-gen" role="alert"></div>
+</form>
+
+<div class="ok hid" id="ok" role="status">
+<h2>Registro enviado</h2>
+<p>Guarda tu código de proyecto:</p>
+<p class="cod" id="cod"></p>
+<p class="mu">Te enviamos la confirmación a <span id="okMail"></span>. Si no la ves, revisa la carpeta de spam.</p>
+<button type="button" id="otro">Registrar otro proyecto</button>
+</div>
+
+<section class="lista hid" id="lista"><h2>Registros hechos desde este dispositivo</h2><div id="items"></div></section>
+</main>
+
+<script>
+(function(){
+var ENDPOINT="https://script.google.com/macros/s/AKfycbx00fdtYIxb7QPVpCyYZ6HGVFlxofSTh2fVgK3nCzW_DttZAOS9_MIRH-GXUG-FdcIf/exec";
+var CIERRE=new Date(2027,3,20,23,59,59); // 20 de abril de 2027
+var AREAS=[
+["Biología","#4ca42b","Seres vivos: plantas, animales, algas, bacterias, hongos y ecosistemas."],
+["Ciencias Ambientales","#f08a1c","Relación entre las personas y el ambiente: aire, agua, suelo y ecosistemas."],
+["Ciencias de la Computación","#1f5c99","Software, apps, IA, robótica, redes y seguridad para resolver problemas reales."],
+["Ciencias Sociales y del Comportamiento","#8a5cf0","Cómo piensan, se comportan y se organizan las personas y las comunidades."],
+["Física y Matemática","#5aa9e6","Energía, materia, movimiento, luz y sonido; modelos y demostraciones matemáticas."],
+["Ingeniería y Tecnología","#c00000","Diseño y construcción de soluciones prácticas ante problemas reales."],
+["Química","#e8606a","Composición, estructura y transformación de la materia."],
+["Salud y Medicina","#009999","Cuerpo humano, prevención de enfermedades, nutrición y salud pública."]];
+var $=function(i){return document.getElementById(i)};
+var key="feria2027_proyectos";
+function load(){try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return[]}}
+function save(a){try{localStorage.setItem(key,JSON.stringify(a))}catch(e){}}
+
+// Plazo
+var cerrado=new Date()>CIERRE;
+(function(){
+var ms=CIERRE-new Date(),d=Math.ceil(ms/864e5);
+if(cerrado){$("plazo").classList.add("cerrado");$("dias").textContent="✕";
+$("plazoTxt").innerHTML="<b style='font-size:1rem'>El registro cerró el 20 de abril de 2027.</b><br><span class='mu'>Ya no se aceptan nuevos proyectos.</span>";
+$("f").classList.add("hid");}
+else{$("dias").textContent=d;$("plazoTxt").innerHTML="<b style='font-size:1rem'>"+(d===1?"día":"días")+" para registrarte</b><br><span class='mu'>Cierra el 20 de abril de 2027 a las 11:59 p. m.</span>";}
+})();
+
+// Áreas
+var ah="";
+AREAS.forEach(function(a){ah+='<label class="area" style="--c:'+a[1]+';margin:0;font-weight:400"><input type="radio" name="area" value="'+a[0]+'"><i></i><div><b>'+a[0]+'</b><span>'+a[2]+'</span></div></label>'});
+$("areas").innerHTML=ah;
+$("areas").addEventListener("change",function(){
+[].forEach.call(document.querySelectorAll(".area"),function(l){l.classList.toggle("on",l.querySelector("input").checked)});$("e-area").textContent=""});
+
+// Integrantes
+var nM=0;
+function addM(){
+if(nM>=9)return;nM++;
+var d=document.createElement("div");d.className="mem";
+d.innerHTML='<label>Integrante '+(nM+1)+': nombre completo</label><input class="m-n" required>';
+$("miembros").appendChild(d);
+$("addM").disabled=nM>=9;}
+$("addM").onclick=addM;
+
+// Contador de palabras
+function palabras(s){s=s.trim();return s?s.split(/\s+/).length:0}
+$("resumen").oninput=function(){var n=palabras(this.value);$("cnt").textContent=n+" / 250 palabras";$("cnt").style.color=n>250?"var(--er)":""};
+
+// Envío
+function marca(el,bad){el.classList.toggle("bad",bad);return bad}
+$("f").addEventListener("submit",function(ev){
+ev.preventDefault();
+var err=0,primero=null;
+function flag(el,bad){if(marca(el,bad)){err++;if(!primero)primero=el}}
+if(!document.querySelector('input[name=area]:checked')){$("e-area").textContent="Elige un área temática.";err++;primero=primero||$("areas")}
+["titulo","asesor","lider","grado","salon"].forEach(function(i){flag($(i),!$(i).value.trim())});
+var n=palabras($("resumen").value);flag($("resumen"),n<1||n>250);
+flag($("correo"),!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($("correo").value));
+[].forEach.call(document.querySelectorAll(".mem input"),function(i){flag(i,!i.value.trim())});
+var fl=$("archivo").files[0];$("e-archivo").textContent="";
+if(!fl){$("e-archivo").textContent="Sube tu anteproyecto.";flag($("archivo"),true)}
+else if(!/\.(pdf|docx?)$/i.test(fl.name)){$("e-archivo").textContent="Solo se aceptan PDF o Word.";flag($("archivo"),true)}
+else if(fl.size>10*1048576){$("e-archivo").textContent="El archivo supera 10 MB.";flag($("archivo"),true)}
+else marca($("archivo"),false);
+$("e-acepto").textContent="";
+if(!$("acepto").checked){$("e-acepto").textContent="Debes confirmar la declaración.";err++;primero=primero||$("acepto")}
+if(new Date()>CIERRE){$("e-gen").textContent="El registro ya cerró.";return}
+if(err){$("e-gen").textContent="Revisa los campos marcados: todos son obligatorios.";if(primero)primero.scrollIntoView({block:"center"});if(primero&&primero.focus)primero.focus();return}
+$("e-gen").textContent="";
+var btn=$("enviar");
+function fallo(m){$("e-gen").textContent=m;btn.disabled=false;btn.textContent="Enviar registro"}
+btn.disabled=true;btn.textContent="Enviando…";
+var area=document.querySelector('input[name=area]:checked').value;
+var rd=new FileReader();
+rd.onerror=function(){fallo("No se pudo leer el archivo.")};
+rd.onload=function(){
+var otros=[].map.call(document.querySelectorAll(".m-n"),function(i){return i.value.trim()}).join("; ");
+var datos={area:area,titulo:$("titulo").value.trim(),resumen:$("resumen").value.trim(),lider:$("lider").value.trim(),grado:$("grado").value.trim(),salon:$("salon").value.trim(),correo:$("correo").value.trim(),integrantes:otros,asesor:$("asesor").value.trim(),archivoNombre:fl.name,archivoTipo:fl.type||"application/octet-stream",archivoBase64:String(rd.result).split(",")[1]};
+fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)})
+.then(function(r){return r.json()})
+.then(function(r){
+if(!r.ok)throw new Error(r.error||"Error del servidor");
+var all=load();all.push({codigo:r.codigo,titulo:datos.titulo,area:area,lider:datos.lider});save(all);
+$("cod").textContent=r.codigo;$("okMail").textContent=datos.correo;
+$("f").classList.add("hid");$("ok").classList.remove("hid");
+btn.disabled=false;btn.textContent="Enviar registro";
+pintar();window.scrollTo(0,0)})
+.catch(function(e){fallo("No se pudo enviar: "+e.message+". Intenta de nuevo.")})};
+rd.readAsDataURL(fl)});
+
+$("otro").onclick=function(){$("f").reset();$("miembros").innerHTML="";nM=0;$("addM").disabled=false;$("cnt").textContent="0 / 250 palabras";
+[].forEach.call(document.querySelectorAll(".area"),function(l){l.classList.remove("on")});
+$("ok").classList.add("hid");$("f").classList.remove("hid");window.scrollTo(0,0)};
+
+function pintar(){
+var a=load();if(!a.length)return;
+$("lista").classList.remove("hid");
+$("items").innerHTML=a.slice().reverse().map(function(p){
+var c=(AREAS.filter(function(x){return x[0]===p.area})[0]||[0,"#888"])[1];
+return '<div class="item" style="--c:'+c+'"><b></b><br><small></small></div>'}).join("");
+var els=$("items").children;
+a.slice().reverse().forEach(function(p,i){els[i].querySelector("b").textContent=p.codigo+" · "+p.titulo;
+els[i].querySelector("small").textContent=p.area+" · Líder: "+p.lider})}
+pintar();
+})();
+</script>
+</body>
+</html>
