@@ -24,7 +24,6 @@ p{margin:0 0 10px}
 .sec header .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ac);color:var(--ac2);display:grid;place-items:center;font-weight:700}
 .sec header h2{margin:0;font-size:1.1rem}
 .sec header p{margin:0;color:var(--mu);font-size:.88rem}
-.tabs{display:flex;gap:8px;margin:0 0 16px}.tabs button{flex:1;padding:10px 8px}.tabs button.on{background:var(--ac);color:var(--ac2)}
 label{display:block;font-weight:600;margin:12px 0 4px;font-size:.95rem}
 input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1.5px solid var(--ln);border-radius:6px;padding:10px 11px}
 textarea{min-height:92px;resize:vertical}
@@ -60,18 +59,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="mu">Todos los campos son obligatorios, incluido el anteproyecto. Los integrantes adicionales son opcionales.</p>
 <div class="plazo" id="plazo"><div><b id="dias">–</b></div><div id="plazoTxt"></div></div>
 
-<nav class="tabs"><button type="button" id="tReg" class="on">Registrar proyecto</button><button type="button" id="tCon">Consultar estado</button></nav>
-
-<section class="sec hid" id="consulta">
-<header><span class="n">i</span><div><h2>Consultar estado</h2><p>Escribe tu código y el correo del líder.</p></div></header>
-<label for="ccod">Código del proyecto</label>
-<input id="ccod" placeholder="FC27-0001" autocapitalize="characters">
-<label for="ccorreo">Correo del líder</label>
-<input id="ccorreo" type="email">
-<button type="button" class="pri" id="cbtn" style="margin-top:16px">Consultar</button>
-<div id="cres" style="margin-top:14px" role="status"></div>
-</section>
-
 <form id="f" novalidate>
 <section class="sec">
 <header><span class="n">1</span><div><h2>Área temática</h2><p>Tu proyecto debe ubicarse en una sola área.</p></div></header>
@@ -80,12 +67,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </section>
 
 <section class="sec">
-<header><span class="n">2</span><div><h2>El proyecto</h2><p>Título, tipo, resumen y anteproyecto.</p></div></header>
+<header><span class="n">2</span><div><h2>El proyecto</h2><p>Título, tipo, laboratorio, resumen y anteproyecto.</p></div></header>
 <label for="titulo">Título del proyecto</label>
 <input id="titulo" maxlength="140" required>
 <label>Tipo de proyecto</label>
 <div class="opts" id="tipo"><label class="opt"><input type="radio" name="tipo" value="Experimental"> Experimental</label><label class="opt"><input type="radio" name="tipo" value="Investigativo"> Investigativo</label></div>
 <div class="msg" id="e-tipo"></div>
+<label>¿Necesitan laboratorio?</label>
+<div class="opts" id="lab"><label class="opt"><input type="radio" name="lab" value="Sí"> Sí</label><label class="opt"><input type="radio" name="lab" value="No"> No</label></div>
+<div class="msg" id="e-lab"></div>
 <label for="resumen">Resumen (máx. 250 palabras)</label>
 <textarea id="resumen" required></textarea>
 <div class="mu" id="cnt">0 / 250 palabras</div>
@@ -136,7 +126,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h2>Registro enviado</h2>
 <p>Guarda tu código de proyecto:</p>
 <p class="cod" id="cod"></p>
-<p class="mu">Te enviamos la confirmación a <span id="okMail"></span>. Si no la ves, revisa la carpeta de spam. Con tu código y ese correo puedes ver el estado de tu proyecto en la pestaña Consultar estado.</p>
+<p class="mu">Te enviamos la confirmación a <span id="okMail"></span>. Si no la ves, revisa la carpeta de spam. Te avisaremos por ese correo cuando tu proyecto sea aprobado o rechazado.</p>
 <button type="button" id="otro">Registrar otro proyecto</button>
 </div>
 
@@ -145,7 +135,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <script>
 (function(){
-var ENDPOINT="https://script.google.com/macros/s/AKfycbxlclPBSQ0uzSqLWNkGA7Hs94C5tr1EJbzI10edKKVFgWLxV2CFQcWz-PhjRn8B5r4Mig/exec";
+var ENDPOINT="https://script.google.com/macros/s/AKfycbzHq98OO_DjHua9MiQsK6EOpdfYgnRyl1pxSAyLDJPXHZteBn1E6sgWHmGPuMrb0oFYnQ/exec";
 var CIERRE=new Date("2027-04-20T23:59:59-05:00"); // 20 de abril de 2027
 var AREAS=[
 ["Biología","#4ca42b","Seres vivos: plantas, animales, algas, bacterias, hongos y ecosistemas."],
@@ -206,6 +196,8 @@ function flag(el,bad){if(marca(el,bad)){err++;if(!primero)primero=el}}
 if(!document.querySelector('input[name=area]:checked')){$("e-area").textContent="Elige un área temática.";err++;primero=primero||$("areas")}
 $("e-tipo").textContent="";
 if(!document.querySelector('input[name=tipo]:checked')){$("e-tipo").textContent="Elige el tipo de proyecto.";err++;primero=primero||$("tipo")}
+$("e-lab").textContent="";
+if(!document.querySelector('input[name=lab]:checked')){$("e-lab").textContent="Indica si necesitan laboratorio.";err++;primero=primero||$("lab")}
 ["titulo","asesor","lider","grado","salon","turno"].forEach(function(i){flag($(i),!$(i).value.trim())});
 var n=palabras($("resumen").value);flag($("resumen"),n<1||n>250);
 flag($("correo"),!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($("correo").value));
@@ -229,7 +221,7 @@ var rd=new FileReader();
 rd.onerror=function(){fallo("No se pudo leer el archivo.")};
 rd.onload=function(){
 var otros=[].map.call(document.querySelectorAll(".m-n"),function(i){return i.value.trim()}).filter(Boolean).join("; ");
-var datos={area:area,tipo:document.querySelector('input[name=tipo]:checked').value,turno:$("turno").value,titulo:$("titulo").value.trim(),resumen:$("resumen").value.trim(),lider:$("lider").value.trim(),grado:$("grado").value.trim(),salon:$("salon").value.trim(),correo:$("correo").value.trim(),integrantes:otros,asesor:$("asesor").value.trim(),archivoNombre:fl.name,archivoTipo:fl.type||"application/octet-stream",archivoBase64:String(rd.result).split(",")[1]};
+var datos={area:area,tipo:document.querySelector('input[name=tipo]:checked').value,laboratorio:document.querySelector('input[name=lab]:checked').value,turno:$("turno").value,titulo:$("titulo").value.trim(),resumen:$("resumen").value.trim(),lider:$("lider").value.trim(),grado:$("grado").value.trim(),salon:$("salon").value.trim(),correo:$("correo").value.trim(),integrantes:otros,asesor:$("asesor").value.trim(),archivoNombre:fl.name,archivoTipo:fl.type||"application/octet-stream",archivoBase64:String(rd.result).split(",")[1]};
 fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)})
 .then(function(r){return r.json()})
 .then(function(r){
@@ -256,28 +248,6 @@ var els=$("items").children;
 a.slice().reverse().forEach(function(p,i){els[i].querySelector("b").textContent=p.codigo+" · "+p.titulo;
 els[i].querySelector("small").textContent=p.area+" · Líder: "+p.lider})}
 
-// Pestañas y consulta de estado
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-function tab(w){
-$("tReg").classList.toggle("on",w==="r");$("tCon").classList.toggle("on",w==="c");
-$("consulta").classList.toggle("hid",w!=="c");
-if(w==="c"){$("f").classList.add("hid");$("ok").classList.add("hid")}
-else if(enviado){$("ok").classList.remove("hid")}
-else if(!cerrado){$("f").classList.remove("hid")}}
-$("tReg").onclick=function(){tab("r")};$("tCon").onclick=function(){tab("c")};
-var COL={"Recibido":"#5a6b7d","En revisión":"#d99a00","Observado":"#f08a1c","Aprobado":"#2e9e4f","Rechazado":"#c00000"};
-$("cbtn").onclick=function(){
-var cod=$("ccod").value.trim().toUpperCase(),cor=$("ccorreo").value.trim(),out=$("cres"),b=$("cbtn");
-out.className="";out.textContent="";
-if(!cod||!cor){out.className="msg";out.textContent="Escribe el código y el correo del líder.";return}
-b.disabled=true;b.textContent="Consultando…";
-fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({accion:"consulta",codigo:cod,correo:cor})})
-.then(function(r){return r.json()})
-.then(function(r){
-if(!r.ok)throw new Error(r.error||"Error del servidor");
-out.innerHTML='<div class="item" style="--c:'+(COL[r.estado]||"#5a6b7d")+'"><b>'+esc(r.estado)+'</b><br><small>'+esc(r.codigo)+' · '+esc(r.titulo)+'</small>'+(r.observaciones?'<p style="margin:8px 0 0">'+esc(r.observaciones)+'</p>':'')+'</div>'})
-.catch(function(e){out.className="msg";out.textContent=e.message})
-.then(function(){b.disabled=false;b.textContent="Consultar"})};
 pintar();
 })();
 </script>
